@@ -1,26 +1,53 @@
 import sqlite3
 
-data_base_col = ['number', 'word']
+data_base_col = ['pre', 'verb', 'post']
 
 
-def add_info(db_name, table_name, col_name, number, word):
+def add_pre(db_name, table_name, word):
     conn = sqlite3.connect(f"{db_name}.db")
     cursor = conn.cursor()
-    cursor.execute(f"""INSERT INTO '{table_name}'('{col_name[0]}', '{col_name[1]}') VALUES('{number}', '{word}') """)
+    cursor.execute(f"""INSERT INTO '{table_name}'('pre') VALUES('{word}') """)
+    conn.commit()
+    conn.close()
+
+
+def add_post(db_name, table_name, word):
+    conn = sqlite3.connect(f"{db_name}.db")
+    cursor = conn.cursor()
+    cursor.execute(f"""INSERT INTO '{table_name}'('post') VALUES('{word}') """)
+    conn.commit()
+    conn.close()
+
+
+def add_verb(db_name, table_name, word):
+    conn = sqlite3.connect(f"{db_name}.db")
+    cursor = conn.cursor()
+    cursor.execute(f"""INSERT INTO '{table_name}'('verb') VALUES('{word}') """)
+    conn.commit()
+    conn.close()
+
+
+def add_all_info(db_name, table_name, col_name, words):
+    conn = sqlite3.connect(f"{db_name}.db")
+    cursor = conn.cursor()
+    cursor.execute(f"""INSERT INTO '{table_name}'('{col_name[0]}', '{col_name[1]}','{col_name[2]}') VALUES('{words[0]}',
+                    '{words[1]}', '{words[2]}') """)
     conn.commit()
     conn.close()
 
 
 # search with condition
-def show_info(db_name, table_name, col_name, word):
+def show_info(db_name, table_name, col_name):
     words_list = []
     conn = sqlite3.connect(f"{db_name}.db")
     cursor = conn.cursor()
-    cursor.execute(f"""SELECT * FROM '{table_name}' WHERE {col_name} = '{word}' """)
+    cursor.execute(f"""SELECT {col_name}
+                   FROM {table_name}
+                    """)
     data = cursor.fetchall()
     for data in data:
         # just showing the word
-        words_list.append(data[1])
+        words_list.append(data[0])
     conn.commit()
     conn.close()
     return words_list
@@ -35,14 +62,11 @@ def show_all_info(db_name, table_name):
     data = cursor.fetchall()
     for data in data:
         # just showing the word
-        words_list.append(data[1])
+        words_list.append(data[0])
     conn.commit()
     conn.close()
     return words_list
 
-
-# add_info('WORDS', 'pre', data_base_col, 1, 'می')
-# show_info('WORDS', 'verbs', 'word', 'دویدن')
 
 def pre_verb(pre, verbs):
     words = []
@@ -52,10 +76,37 @@ def pre_verb(pre, verbs):
     return words
 
 
-pre = show_all_info('WORDS', 'pre')
-verbs = show_all_info('WORDS', 'verbs')
-print(pre)
-print(verbs)
-print(pre_verb(pre, verbs))
+def verb_post(verb, post):
+    words = []
+    for x in verb:
+        for y in post:
+            word = x+y
+            words.append(word)
+    return words
 
 
+def pre_verb_post(pre, verb, post):
+    words = []
+    for x in pre:
+        for y in verb:
+            for z in post:
+                word = x+y+z
+                words.append(word)
+
+    return words
+
+
+verbs = show_info('final', 'words', 'verb')
+pre = show_info('final', 'words', 'pre')
+post = show_info('final', 'words', 'post')
+
+
+mix = verb_post(verbs, post)
+mix2 = pre_verb(pre, verbs)
+mix3 = pre_verb_post(pre, verbs, post)
+print('verbs :', verbs)
+print('pre :', pre)
+print('post :', post)
+print(mix)
+print(mix2)
+print(mix3)
